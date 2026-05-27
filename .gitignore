@@ -5,3 +5,5 @@ __pycache__/
 output/
 code/data/init/
 diffvg/build/
+web/node_modules/
+web/.next/
