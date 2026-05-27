@@ -1,0 +1,7 @@
+TOKEN
+__pycache__/
+*.egg-info/
+*.pyc
+output/
+code/data/init/
+diffvg/build/
