@@ -29,6 +29,7 @@ def parse_args():
     parser.add_argument('--batch_size', type=int, default=1)
     parser.add_argument('--use_wandb', type=int, default=0)
     parser.add_argument('--wandb_user', type=str, default="none")
+    parser.add_argument('--num_iter', type=int, default=None, help="override num_iter from yaml")
 
     cfg = edict()
     args = parser.parse_args()
@@ -52,6 +53,8 @@ def parse_args():
     cfg.token = args.token
     cfg.use_wandb = args.use_wandb
     cfg.wandb_user = args.wandb_user
+    if args.num_iter is not None:
+        cfg.num_iter = args.num_iter
     cfg.letter = f"{args.font}_{args.optimized_letter}_scaled"
     cfg.target = f"code/data/init/{cfg.letter}"
 

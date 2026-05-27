@@ -19,7 +19,7 @@ EXPERIMENT = "conformal_0.5_dist_pixel_100_kernel201"
 FONT = "NeutralStd-Medium"
 TOTAL_STEPS = 500
 
-jobs: dict[str, dict] = {}
+jobs = {}
 
 
 def _watch_stderr(job_id: str, proc: subprocess.Popen) -> None:
@@ -67,6 +67,7 @@ def generate():
     word = body.get("word", "").strip().upper()
     letter = body.get("letter", "").strip().upper()
     seed = int(body.get("seed", 0))
+    num_iter = int(body.get("num_iter", TOTAL_STEPS))
 
     if not concept or not word or not letter:
         return jsonify(error="concept, word and letter are required"), 400
@@ -83,6 +84,7 @@ def generate():
         "--optimized_letter", letter,
         "--font", FONT,
         "--seed", str(seed),
+        "--num_iter", str(num_iter),
         "--use_wandb", "0",
     ]
     proc = subprocess.Popen(
@@ -97,7 +99,7 @@ def generate():
     jobs[job_id] = {
         "proc": proc,
         "step": 0,
-        "total": TOTAL_STEPS,
+        "total": num_iter,
         "status": "running",
         "svg_path": None,
         "concept": concept,

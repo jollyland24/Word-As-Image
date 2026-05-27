@@ -9,6 +9,7 @@ export default function Home() {
   const [word, setWord] = useState("BUNNY");
   const [letter, setLetter] = useState("Y");
   const [seed, setSeed] = useState(0);
+  const [numIter, setNumIter] = useState(50);
 
   const [phase, setPhase] = useState<Phase>("idle");
   const [step, setStep] = useState(0);
@@ -37,7 +38,7 @@ export default function Home() {
     const res = await fetch("/api/generate", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ concept, word, letter, seed }),
+      body: JSON.stringify({ concept, word, letter, seed, num_iter: numIter }),
     });
     const data = await res.json();
 
@@ -135,16 +136,32 @@ export default function Home() {
             required
           />
         </div>
-        <div className="flex flex-col gap-1">
-          <label className="text-xs font-medium text-neutral-400 uppercase tracking-wider">
-            Seed
-          </label>
-          <input
-            type="number"
-            value={seed}
-            onChange={(e) => setSeed(Number(e.target.value))}
-            className="bg-neutral-800 rounded-lg px-4 py-2.5 text-neutral-100 outline-none focus:ring-2 focus:ring-indigo-500 w-28"
-          />
+        <div className="flex gap-4">
+          <div className="flex flex-col gap-1">
+            <label className="text-xs font-medium text-neutral-400 uppercase tracking-wider">
+              Seed
+            </label>
+            <input
+              type="number"
+              value={seed}
+              onChange={(e) => setSeed(Number(e.target.value))}
+              className="bg-neutral-800 rounded-lg px-4 py-2.5 text-neutral-100 outline-none focus:ring-2 focus:ring-indigo-500 w-28"
+            />
+          </div>
+          <div className="flex flex-col gap-1">
+            <label className="text-xs font-medium text-neutral-400 uppercase tracking-wider">
+              Steps
+              <span className="ml-2 normal-case font-normal text-neutral-600">— 50 for test, 500 full</span>
+            </label>
+            <input
+              type="number"
+              min={1}
+              max={500}
+              value={numIter}
+              onChange={(e) => setNumIter(Number(e.target.value))}
+              className="bg-neutral-800 rounded-lg px-4 py-2.5 text-neutral-100 outline-none focus:ring-2 focus:ring-indigo-500 w-28"
+            />
+          </div>
         </div>
 
         <button
