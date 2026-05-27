@@ -9,7 +9,7 @@ EXPERIMENT=conformal_0.5_dist_pixel_100_kernel201
 
 CONCEPT=BUNNY
 WORD=BUNNY
-fonts=(KaushanScript-Regular)
+fonts=(NeutralStd-Medium)
 for j in "${fonts[@]}"
 do
     letter_=("Y")

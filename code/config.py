@@ -20,7 +20,7 @@ def parse_args():
     parser.add_argument("--experiment", type=str, default="conformal_0.5_dist_pixel_100_kernel201")
     parser.add_argument("--seed", type=int, default=0)
     parser.add_argument('--log_dir', metavar='DIR', default="output")
-    parser.add_argument('--font', type=str, default="none", help="font name")
+    parser.add_argument('--font', type=str, default="NeutralStd-Medium", help="font name")
     parser.add_argument('--semantic_concept', type=str, help="the semantic concept to insert")
     parser.add_argument('--word', type=str, default="none", help="the text to work on")
     parser.add_argument('--prompt_suffix', type=str, default="minimal flat 2d vector. lineal color."

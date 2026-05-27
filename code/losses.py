@@ -2,6 +2,7 @@ import torch.nn as nn
 import torchvision
 from scipy.spatial import Delaunay
 import torch
+import contextlib
 import numpy as np
 from torch.nn import functional as nnf
 from easydict import EasyDict
@@ -15,8 +16,9 @@ class SDSLoss(nn.Module):
         super(SDSLoss, self).__init__()
         self.cfg = cfg
         self.device = device
+        torch_dtype = torch.float16 if device.type == 'cuda' else torch.float32
         self.pipe = StableDiffusionPipeline.from_pretrained(cfg.diffusion.model,
-                                                       torch_dtype=torch.float16, use_auth_token=cfg.token)
+                                                       torch_dtype=torch_dtype, token=cfg.token)
         self.pipe = self.pipe.to(self.device)
         # default scheduler: PNDMScheduler(beta_start=0.00085, beta_end=0.012,
         # beta_schedule="scaled_linear", num_train_timesteps=1000)
@@ -48,7 +50,8 @@ class SDSLoss(nn.Module):
 
         # encode rendered image
         x = x_aug * 2. - 1.
-        with torch.cuda.amp.autocast():
+        autocast = torch.cuda.amp.autocast() if self.device.type == 'cuda' else contextlib.nullcontext()
+        with autocast:
             init_latent_z = (self.pipe.vae.encode(x).latent_dist.sample())
         latent_z = 0.18215 * init_latent_z  # scaling_factor * init_latents
 
@@ -68,7 +71,8 @@ class SDSLoss(nn.Module):
             # denoise
             z_in = torch.cat([noised_latent_zt] * 2)  # expand latents for classifier free guidance
             timestep_in = torch.cat([timestep] * 2)
-            with torch.autocast(device_type="cuda", dtype=torch.float16):
+            unet_autocast = torch.autocast(device_type='cuda', dtype=torch.float16) if self.device.type == 'cuda' else contextlib.nullcontext()
+            with unet_autocast:
                 eps_t_uncond, eps_t = self.pipe.unet(z_in, timestep, encoder_hidden_states=self.text_embeddings).sample.float().chunk(2)
 
             eps_t = eps_t_uncond + self.cfg.diffusion.guidance_scale * (eps_t - eps_t_uncond)
@@ -161,7 +165,7 @@ class ConformalLoss:
             poly = poly.buffer(0)
             points_np = np.concatenate(points_np)
             faces = Delaunay(points_np).simplices
-            is_intersect = np.array([poly.contains(Point(points_np[face].mean(0))) for face in faces], dtype=np.bool)
+            is_intersect = np.array([poly.contains(Point(points_np[face].mean(0))) for face in faces], dtype=bool)
             faces_.append(torch.from_numpy(faces[is_intersect]).to(device, dtype=torch.int64))
         return faces_
 
